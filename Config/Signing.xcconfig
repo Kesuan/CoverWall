@@ -1,0 +1,2 @@
+// Committed signing bridge. Personal values stay in Signing.local.xcconfig.
+#include? "Signing.local.xcconfig"

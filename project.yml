@@ -1,0 +1,85 @@
+name: CoverWall
+options:
+  # Neutral prefix only — do not put a personal reverse-DNS here.
+  # Real bundle ids for App Store belong in Config/Signing.local.xcconfig (gitignored).
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "17.0"
+    macOS: "14.0"
+  createIntermediateGroups: true
+configFiles:
+  Debug: Config/Signing.xcconfig
+  Release: Config/Signing.xcconfig
+settings:
+  base:
+    SWIFT_VERSION: "5.10"
+    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "1.0"
+    GENERATE_INFOPLIST_FILE: NO
+schemes:
+  CoverWall:
+    build:
+      targets:
+        CoverWall: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+targets:
+  CoverWall:
+    type: application
+    supportedDestinations: [iOS, macOS]
+    deploymentTarget:
+      iOS: "17.0"
+      macOS: "14.0"
+    sources:
+      - path: CoverWall
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.coverwall
+        INFOPLIST_FILE: CoverWall/Info.plist
+        CODE_SIGN_STYLE: Automatic
+        # DEVELOPMENT_TEAM lives in Config/Signing.local.xcconfig (not committed).
+        # Only "Apple Development" is installed (no Mac Development).
+        # Ad-hoc for local macOS runs; iOS keeps Automatic + local team override.
+        "CODE_SIGN_IDENTITY[sdk=macosx*]": "-"
+        CODE_SIGN_ENTITLEMENTS: CoverWall/CoverWall.entitlements
+        GENERATE_INFOPLIST_FILE: NO
+        SWIFT_VERSION: "5.10"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_PREVIEWS: YES
+    postBuildScripts:
+      - name: Install Complete macOS App Icon
+        basedOnDependencyAnalysis: false
+        script: |
+          set -euo pipefail
+          # actool sometimes emits a thinned icns; rebuild a complete one and re-sign.
+          if [ "${PLATFORM_NAME:-}" != "macosx" ]; then
+            exit 0
+          fi
+          SRC="${PROJECT_DIR}/Design/AppIcon/png"
+          APP="${TARGET_BUILD_DIR}/${WRAPPER_NAME}"
+          ICONSET="${DERIVED_FILE_DIR}/AppIcon.iconset"
+          ICNS="${APP}/Contents/Resources/AppIcon.icns"
+          rm -rf "${ICONSET}"
+          mkdir -p "${ICONSET}"
+          cp "${SRC}/AppIcon-Light-16.png"   "${ICONSET}/icon_16x16.png"
+          cp "${SRC}/AppIcon-Light-32.png"   "${ICONSET}/icon_16x16@2x.png"
+          cp "${SRC}/AppIcon-Light-32.png"   "${ICONSET}/icon_32x32.png"
+          cp "${SRC}/AppIcon-Light-64.png"   "${ICONSET}/icon_32x32@2x.png"
+          cp "${SRC}/AppIcon-Light-128.png"  "${ICONSET}/icon_128x128.png"
+          cp "${SRC}/AppIcon-Light-256.png"  "${ICONSET}/icon_128x128@2x.png"
+          cp "${SRC}/AppIcon-Light-256.png"  "${ICONSET}/icon_256x256.png"
+          cp "${SRC}/AppIcon-Light-512.png"  "${ICONSET}/icon_256x256@2x.png"
+          cp "${SRC}/AppIcon-Light-512.png"  "${ICONSET}/icon_512x512.png"
+          cp "${SRC}/AppIcon-Light-1024.png" "${ICONSET}/icon_512x512@2x.png"
+          iconutil -c icns "${ICONSET}" -o "${ICNS}"
+          codesign --force --sign - --timestamp=none "${APP}" >/dev/null 2>&1 || true
+          touch "${APP}"
+          LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister"
+          "${LSREGISTER}" -f "${APP}" >/dev/null 2>&1 || true

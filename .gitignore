@@ -1,0 +1,30 @@
+# Xcode
+DerivedData/
+build/
+*.xcuserstate
+xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+*.swp
+*~
+
+# Local env / signing identity (team id, personal bundle id)
+*.xcconfig.local
+Config/Signing.local.xcconfig
+*.p12
+*.mobileprovision
+*.cer
+*.certSigningRequest

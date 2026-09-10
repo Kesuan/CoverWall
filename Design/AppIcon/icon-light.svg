@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <clipPath id="tile">
+      <rect width="1024" height="1024" rx="228" ry="228"/>
+    </clipPath>
+    <!-- 与奶油斜带平行、略偏左，由斜带完整盖住切口 -->
+    <clipPath id="discClip">
+      <polygon points="0,0 715,0 373,1024 0,1024"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#tile)">
+    <rect width="1024" height="1024" fill="#EDE4D0"/>
+    <circle cx="398" cy="512" r="302" fill="#2F3334" clip-path="url(#discClip)"/>
+    <circle cx="412" cy="518" r="118" fill="none" stroke="#EDE4D0" stroke-width="56"/>
+    <path d="M 418 818 L 612 238" fill="none" stroke="#EDE4D0" stroke-width="64" stroke-linecap="round"/>
+    <rect x="575" y="248" width="276" height="568" rx="42" ry="42" fill="#D9481A"/>
+  </g>
+</svg>

@@ -1,0 +1,55 @@
+/* App */
+"app_title" = "CoverWall";
+"app_tagline" = "Turn album artwork into device-ready wallpapers.";
+"unknown_title" = "Unknown";
+
+/* Search */
+"search_placeholder" = "Song or album…";
+"search_action" = "Search";
+"search_idle_title" = "Find an album";
+"search_idle_hint" = "Search the iTunes catalog, then pick a cover to generate wallpapers.";
+"search_in_progress" = "Searching…";
+"search_empty" = "No results";
+"search_failed" = "Search failed";
+"search_result_count" = "Results ready";
+"section_albums" = "Albums";
+"section_songs" = "Songs";
+
+/* Devices */
+"device_iphone" = "iPhone";
+"device_ipad" = "iPad";
+"device_mac" = "Mac";
+"target_device" = "Target Screen";
+
+/* Algorithms */
+"algo_smart_crop" = "Smart Crop";
+"algo_mirror_blur" = "Mirror + Blur";
+"algo_frequency_separation" = "Frequency Separation";
+"algo_blur_fill" = "Blur Fill";
+"algo_smart_crop_desc" = "Content-aware framing with the original image filling the canvas.";
+"algo_mirror_blur_desc" = "A clear central image over a soft, mirrored atmosphere.";
+"algo_frequency_separation_desc" = "Low-frequency color expansion with protected foreground detail.";
+"algo_blur_fill_desc" = "Full-bleed artwork with a top-weighted haze and ambient depth fill.";
+
+/* Studio */
+"studio_empty_title" = "Wallpaper Studio";
+"studio_empty_hint" = "Select an album to download its cover and generate four wallpaper styles.";
+"loading_artwork" = "Downloading high-resolution artwork…";
+"loading_generate" = "Generating four wallpapers…";
+"artwork_source_label" = "source artwork";
+"preview_action" = "Preview";
+"exit_preview_action" = "Tap to exit preview";
+
+/* Export */
+"save_photos" = "Save to Photos";
+"save_file" = "Save File…";
+"share_action" = "Share";
+"export_saved_photos" = "Saved to Photos";
+"export_saved_file" = "File saved";
+
+/* Errors */
+"error_invalid_image" = "Could not decode the artwork image.";
+"error_invalid_artwork_url" = "Invalid artwork URL.";
+"error_encode_failed" = "Could not encode the wallpaper as JPEG.";
+"error_photo_permission" = "Photo library permission was denied.";
+"error_save_failed" = "Could not save the wallpaper.";

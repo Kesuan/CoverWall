@@ -1,0 +1,55 @@
+/* App */
+"app_title" = "CoverWall";
+"app_tagline" = "把专辑封面变成设备壁纸。";
+"unknown_title" = "未知";
+
+/* Search */
+"search_placeholder" = "歌名 / 专辑名…";
+"search_action" = "搜索";
+"search_idle_title" = "找一张专辑";
+"search_idle_hint" = "搜索 iTunes 曲库，选中封面后即可生成壁纸。";
+"search_in_progress" = "搜索中…";
+"search_empty" = "没有结果";
+"search_failed" = "搜索失败";
+"search_result_count" = "结果已就绪";
+"section_albums" = "专辑";
+"section_songs" = "歌曲";
+
+/* Devices */
+"device_iphone" = "iPhone";
+"device_ipad" = "iPad";
+"device_mac" = "Mac";
+"target_device" = "目标设备";
+
+/* Algorithms */
+"algo_smart_crop" = "智能裁切";
+"algo_mirror_blur" = "镜像模糊";
+"algo_frequency_separation" = "频率分离";
+"algo_blur_fill" = "氛围填充";
+"algo_smart_crop_desc" = "内容感知构图，用原图铺满画布。";
+"algo_mirror_blur_desc" = "中央清晰封面，四周柔和镜像氛围。";
+"algo_frequency_separation_desc" = "低频色彩延展，前景细节受保护。";
+"algo_blur_fill_desc" = "短边满幅，顶部渐隐与环境色景深填充。";
+
+/* Studio */
+"studio_empty_title" = "壁纸工作室";
+"studio_empty_hint" = "选择一张专辑，下载高清封面并生成四种壁纸风格。";
+"loading_artwork" = "正在下载高清封面…";
+"loading_generate" = "正在生成四种壁纸…";
+"artwork_source_label" = "源封面";
+"preview_action" = "预览";
+"exit_preview_action" = "轻点退出预览";
+
+/* Export */
+"save_photos" = "保存到相册";
+"save_file" = "存储文件…";
+"share_action" = "分享";
+"export_saved_photos" = "已保存到相册";
+"export_saved_file" = "文件已保存";
+
+/* Errors */
+"error_invalid_image" = "无法解码封面图片。";
+"error_invalid_artwork_url" = "封面地址无效。";
+"error_encode_failed" = "无法将壁纸编码为 JPEG。";
+"error_photo_permission" = "相册权限被拒绝。";
+"error_save_failed" = "无法保存壁纸。";

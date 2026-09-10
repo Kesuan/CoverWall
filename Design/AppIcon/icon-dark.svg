@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <clipPath id="tile">
+      <rect width="1024" height="1024" rx="228" ry="228"/>
+    </clipPath>
+    <clipPath id="discClip">
+      <polygon points="0,0 715,0 373,1024 0,1024"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#tile)">
+    <!-- 墨黑底 -->
+    <rect width="1024" height="1024" fill="#222628"/>
+    <!-- 暖骨白圆盘（对角裁切） -->
+    <circle cx="398" cy="512" r="302" fill="#E8DFC8" clip-path="url(#discClip)"/>
+    <!-- 圆心厚环 / 斜带用底色切入骨白圆盘 -->
+    <circle cx="412" cy="518" r="118" fill="none" stroke="#222628" stroke-width="56"/>
+    <path d="M 418 818 L 612 238" fill="none" stroke="#222628" stroke-width="64" stroke-linecap="round"/>
+    <!-- 朱红竖屏 -->
+    <rect x="575" y="248" width="276" height="568" rx="42" ry="42" fill="#D9481A"/>
+  </g>
+</svg>
