@@ -105,6 +105,12 @@ xcodebuild -project CoverWall.xcodeproj -scheme CoverWall \
 
 `finish()` 里的 portrait damping（按宽高比压暗渐晕/上下暗角）是为了竖屏不“糊成一片”，不要为了对称去去掉。
 
+## README 示例资源
+
+- 示例封面与四算法全尺寸壁纸在 `Docs/Examples/`（`readme/` 为嵌入用缩略图）。
+- 改算法后可用 `Tools/GenerateReadmeExamples/main.swift` 链上 `Models` + `WallpaperGenerator` 重新导出，命令见 README Examples 小节。
+- 示例封面是文档用原创插画，**不是**真实专辑封面。
+
 ## 提交约定
 
 - 信息用英文祈使句，说明 *why* 而不是罗列文件。

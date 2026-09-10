@@ -1,8 +1,17 @@
-# CoverWall
+<p align="center">
+  <img src="Design/AppIcon/png/AppIcon-Light-256.png" width="96" height="96" alt="CoverWall icon">
+</p>
 
-Turn album artwork into device-ready wallpapers.
+<h1 align="center">CoverWall</h1>
 
-CoverWall is a native SwiftUI app for **iPhone, iPad, and Mac**. Search the iTunes catalog, pull high-resolution cover art (up to 3000×3000 when available), and generate four distinct wallpaper styles sized for your screen — then save to Photos or share.
+<p align="center">
+  <strong>Turn album artwork into device-ready wallpapers.</strong>
+</p>
+
+<p align="center">
+  Native SwiftUI for iPhone, iPad, and Mac.<br>
+  Search the iTunes catalog, pull high-resolution cover art, generate four wallpaper styles — save or share.
+</p>
 
 ## Features
 
@@ -15,6 +24,74 @@ CoverWall is a native SwiftUI app for **iPhone, iPad, and Mac**. Search the iTun
   - **Blur Fill** — full-bleed short side, top-weighted haze, ambient depth grade
 - Save to the photo library, system Share sheet, or (on Mac) save as a JPEG file
 - Interface localized in **English** and **简体中文**
+
+## Examples
+
+Demo source art is an **original illustration for documentation only** (not a real album). All wallpapers below were produced by this repo’s `WallpaperGenerator` via `Tools/GenerateReadmeExamples`.
+
+<table>
+  <tr>
+    <td align="center" width="22%">
+      <img src="Docs/Examples/readme/source-cover.jpg" alt="Source cover" width="100%"><br>
+      <sub><b>Source cover</b><br>1600 × 1600</sub>
+    </td>
+    <td align="center" width="26%">
+      <img src="Docs/Examples/readme/iPhone-smartCrop.jpg" alt="Smart Crop on iPhone" width="100%"><br>
+      <sub><b>Smart Crop</b><br>iPhone 1179 × 2556</sub>
+    </td>
+    <td align="center" width="26%">
+      <img src="Docs/Examples/readme/iPhone-mirrorBlur.jpg" alt="Mirror + Blur on iPhone" width="100%"><br>
+      <sub><b>Mirror + Blur</b><br>iPhone 1179 × 2556</sub>
+    </td>
+    <td align="center" width="26%">
+      <img src="Docs/Examples/readme/iPhone-blurFill.jpg" alt="Blur Fill on iPhone" width="100%"><br>
+      <sub><b>Blur Fill</b><br>iPhone 1179 × 2556</sub>
+    </td>
+  </tr>
+</table>
+
+### Four styles on each target
+
+<table>
+  <tr>
+    <td align="center"><img src="Docs/Examples/readme/iPhone-smartCrop.jpg" width="120" alt="iPhone Smart Crop"><br><sub>Smart Crop</sub></td>
+    <td align="center"><img src="Docs/Examples/readme/iPhone-mirrorBlur.jpg" width="120" alt="iPhone Mirror Blur"><br><sub>Mirror + Blur</sub></td>
+    <td align="center"><img src="Docs/Examples/readme/iPhone-frequencySeparation.jpg" width="120" alt="iPhone Frequency Separation"><br><sub>Frequency Separation</sub></td>
+    <td align="center"><img src="Docs/Examples/readme/iPhone-blurFill.jpg" width="120" alt="iPhone Blur Fill"><br><sub>Blur Fill</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="4"><sub><b>iPhone</b> · 1179 × 2556</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="Docs/Examples/readme/iPad-smartCrop.jpg" height="160" alt="iPad Smart Crop"><br><sub>Smart Crop</sub></td>
+    <td align="center"><img src="Docs/Examples/readme/iPad-mirrorBlur.jpg" height="160" alt="iPad Mirror Blur"><br><sub>Mirror + Blur</sub></td>
+    <td align="center"><img src="Docs/Examples/readme/iPad-frequencySeparation.jpg" height="160" alt="iPad Frequency Separation"><br><sub>Frequency Separation</sub></td>
+    <td align="center"><img src="Docs/Examples/readme/iPad-blurFill.jpg" height="160" alt="iPad Blur Fill"><br><sub>Blur Fill</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="4"><sub><b>iPad</b> · 1668 × 2388</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><img src="Docs/Examples/readme/mac-smartCrop.jpg" width="100%" alt="Mac Smart Crop"><br><sub>Smart Crop</sub></td>
+    <td align="center" colspan="2"><img src="Docs/Examples/readme/mac-mirrorBlur.jpg" width="100%" alt="Mac Mirror Blur"><br><sub>Mirror + Blur</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="2"><img src="Docs/Examples/readme/mac-frequencySeparation.jpg" width="100%" alt="Mac Frequency Separation"><br><sub>Frequency Separation</sub></td>
+    <td align="center" colspan="2"><img src="Docs/Examples/readme/mac-blurFill.jpg" width="100%" alt="Mac Blur Fill"><br><sub>Blur Fill</sub></td>
+  </tr>
+  <tr>
+    <td align="center" colspan="4"><sub><b>Mac</b> · 2880 × 1800</sub></td>
+  </tr>
+</table>
+
+Full-resolution JPEGs live in [`Docs/Examples/`](Docs/Examples) (open any file for the export size). Regenerate after algorithm changes:
+
+```bash
+swiftc -O -o /tmp/cw-examples \
+  CoverWall/Models.swift CoverWall/WallpaperGenerator.swift \
+  Tools/GenerateReadmeExamples/main.swift
+/tmp/cw-examples Docs/Examples Docs/Examples/source-cover.jpg
+```
 
 ## Supported platforms
 
@@ -35,7 +112,7 @@ CoverWall is a native SwiftUI app for **iPhone, iPad, and Mac**. Search the iTun
 ## Getting started
 
 ```bash
-git clone <this-repo>
+git clone https://github.com/Kesuan/CoverWall.git
 cd CoverWall
 open CoverWall.xcodeproj
 ```
@@ -118,6 +195,8 @@ CoverWall/
 │   ├── Assets.xcassets/AppIcon.appiconset/
 │   └── *.lproj/Localizable.strings
 ├── Design/AppIcon/             # SVG sources + PNG export pipeline
+├── Docs/Examples/              # README demo cover + full-res wallpapers
+├── Tools/GenerateReadmeExamples/
 ├── LICENSE
 ├── AGENTS.md
 └── README.md
@@ -139,7 +218,7 @@ Photo library access is **add-only** (`NSPhotoLibraryAddUsageDescription`). The 
 
 - Artwork resolution depends on what the iTunes CDN actually hosts; the app requests 3000×3000 but will receive a smaller image if that is the source cap.
 - No Apple Music library access and no local-file import — search only.
-- No sample cover art is bundled (copyright). Always use live search results when testing.
+- No real album cover art is bundled for testing in the app; use live search results. README demo art is an original AI illustration under the repo license.
 - App icons ship in `Assets.xcassets` (macOS dark appearance is documented in `Design/AppIcon/README.md` but not wired into the multiplatform catalog).
 - Committed bundle id is the neutral `com.example.coverwall`; override it locally before device or store builds.
 
@@ -157,3 +236,4 @@ This is a source-available license, not an OSI-approved open-source license.
 
 - Search approach validated against the public **iTunes Search API**
 - Wallpaper pipelines developed in a dedicated algorithm comparison prototype (Smart Crop / Mirror+Blur / Frequency Separation / Blur Fill)
+- README demo cover generated as original illustration art for this project
