@@ -72,6 +72,7 @@ private struct SearchSidebar: View {
             SearchResultsList(model: model, selection: $selection)
         }
         .background(.regularMaterial)
+        .task { await model.loadFeaturedAlbums() }
     }
 }
 #endif
@@ -140,16 +141,7 @@ private struct SearchResultsList: View {
     var body: some View {
         Group {
             if !model.hasResults && !model.isSearching {
-                ScrollView {
-                    ContentUnavailableView {
-                        Label(String(localized: "search_idle_title"), systemImage: "music.note.house")
-                    } description: {
-                        Text(model.statusKey)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 32)
-                }
-                .scrollIndicators(.hidden)
+                FeaturedSidebarContent(model: model, selection: $selection)
             } else {
                 List(selection: $selection) {
                     if !model.albums.isEmpty {
@@ -172,6 +164,62 @@ private struct SearchResultsList: View {
                 .listStyle(.sidebar)
             }
         }
+    }
+}
+
+private struct FeaturedSidebarContent: View {
+    let model: SearchViewModel
+    @Binding var selection: ITunesResult?
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 8) {
+                    Text("featured_title")
+                        .font(.headline)
+                    Spacer()
+                    Button {
+                        Task { await model.refreshFeaturedAlbums() }
+                    } label: {
+                        if model.isLoadingFeatured {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                    }
+                    .buttonStyle(.borderless)
+                    .disabled(model.isLoadingFeatured)
+                    .help(String(localized: "featured_refresh"))
+                }
+
+                if !model.featuredAlbums.isEmpty {
+                    FeaturedAlbumsGrid(albums: model.featuredAlbums) { album in
+                        selection = album
+                    }
+                } else if model.isLoadingFeatured {
+                    HStack {
+                        Spacer()
+                        ProgressView(String(localized: "featured_loading"))
+                        Spacer()
+                    }
+                    .padding(.top, 24)
+                } else {
+                    VStack(spacing: 8) {
+                        Image(systemName: "music.note.house")
+                            .font(.title2)
+                            .foregroundStyle(.secondary)
+                        Text("featured_failed")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 24)
+                }
+            }
+            .padding(16)
+        }
+        .scrollIndicators(.hidden)
     }
 }
 
@@ -278,19 +326,127 @@ private struct SearchList: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .padding(.top, 24)
             } else {
-                ContentUnavailableView(
-                    String(localized: "search_idle_title"),
-                    systemImage: "music.note.house",
-                    description: Text(String(localized: "search_idle_hint"))
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .padding(.top, 24)
+                featuredSection
             }
         }
         .navigationTitle("app_title")
+        .task { await model.loadFeaturedAlbums() }
+    }
+
+    @ViewBuilder
+    private var featuredSection: some View {
+        if !model.featuredAlbums.isEmpty {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("featured_title")
+                        .font(.headline)
+                    FeaturedAlbumsGrid(albums: model.featuredAlbums) { album in
+                        selection = album
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 16)
+            }
+            .refreshable { await model.refreshFeaturedAlbums() }
+        } else if model.isLoadingFeatured {
+            VStack(spacing: 12) {
+                ProgressView()
+                Text("featured_loading")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .padding(.top, 24)
+        } else {
+            ScrollView {
+                ContentUnavailableView {
+                    Label(String(localized: "search_idle_title"), systemImage: "music.note.house")
+                } description: {
+                    Text(
+                        model.featuredFailed
+                            ? String(localized: "featured_failed")
+                            : String(localized: "search_idle_hint")
+                    )
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 32)
+            }
+            .refreshable { await model.refreshFeaturedAlbums() }
+        }
     }
 }
 #endif
+
+// MARK: - Featured albums
+
+private struct FeaturedAlbumsGrid: View {
+    let albums: [ITunesResult]
+    let onSelect: (ITunesResult) -> Void
+
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var columns: [GridItem] {
+        #if os(iOS)
+        if horizontalSizeClass == .regular {
+            return [GridItem(.adaptive(minimum: 150, maximum: 220), spacing: 12)]
+        }
+        #endif
+        return [GridItem(.adaptive(minimum: 96, maximum: 160), spacing: 12)]
+    }
+
+    var body: some View {
+        LazyVGrid(columns: columns, alignment: .leading, spacing: 16) {
+            ForEach(albums) { album in
+                Button {
+                    onSelect(album)
+                } label: {
+                    FeaturedAlbumCell(album: album)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+}
+
+private struct FeaturedAlbumCell: View {
+    let album: ITunesResult
+
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    private var usesLargeLayout: Bool {
+        #if os(iOS)
+        horizontalSizeClass == .regular
+        #else
+        false
+        #endif
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Color.clear
+                .aspectRatio(1, contentMode: .fit)
+                .overlay {
+                    AsyncImage(url: album.artworkURL(size: 600)) { image in
+                        image
+                            .resizable()
+                            .scaledToFill()
+                    } placeholder: {
+                        Rectangle()
+                            .fill(.quaternary)
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+            Text(album.title)
+                .font(usesLargeLayout ? .subheadline.weight(.semibold) : .caption.weight(.semibold))
+                .lineLimit(1)
+            Text(album.artistName)
+                .font(usesLargeLayout ? .footnote : .caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+        }
+    }
+}
 
 // MARK: - Shared row
 
@@ -299,7 +455,7 @@ struct ResultRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            AsyncImage(url: URL(string: result.artworkUrl100)) { phase in
+            AsyncImage(url: result.artworkURL(size: 200)) { phase in
                 if let image = phase.image {
                     image
                         .resizable()

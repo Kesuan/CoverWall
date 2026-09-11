@@ -68,7 +68,7 @@ struct StudioDetail: View {
     private var header: some View {
         HStack(alignment: .top, spacing: 16) {
             if let selection {
-                AsyncImage(url: URL(string: selection.artworkUrl100)) { phase in
+                AsyncImage(url: selection.artworkURL(size: 300)) { phase in
                     if let image = phase.image {
                         image.resizable().scaledToFill()
                     } else {

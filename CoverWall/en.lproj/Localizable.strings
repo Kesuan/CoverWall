@@ -15,6 +15,12 @@
 "section_albums" = "Albums";
 "section_songs" = "Songs";
 
+/* Featured */
+"featured_title" = "Discover";
+"featured_loading" = "Loading albums…";
+"featured_failed" = "Could not load albums.";
+"featured_refresh" = "Refresh";
+
 /* Devices */
 "device_iphone" = "iPhone";
 "device_ipad" = "iPad";

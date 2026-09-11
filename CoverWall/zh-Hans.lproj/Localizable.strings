@@ -15,6 +15,12 @@
 "section_albums" = "专辑";
 "section_songs" = "歌曲";
 
+/* Featured */
+"featured_title" = "发现专辑";
+"featured_loading" = "正在加载专辑…";
+"featured_failed" = "无法加载专辑。";
+"featured_refresh" = "刷新";
+
 /* Devices */
 "device_iphone" = "iPhone";
 "device_ipad" = "iPad";

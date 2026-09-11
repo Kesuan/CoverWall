@@ -65,6 +65,7 @@ xcodebuild -project CoverWall.xcodeproj -scheme CoverWall \
 | `SearchViewModel.swift` | 搜索词、结果列表、搜索状态 |
 | `ITunesModels.swift` | 搜索结果模型 |
 | `ITunesSearchService.swift` | 专辑+歌曲并行搜索、封面下载 |
+| `ITunesChartsService.swift` | 官方 RSS 榜单 + 随机流派混池（发现页封面墙） |
 | `WallpaperStudioViewModel.swift` | 选中项、目标设备、后台生成与导出编排 |
 | `ArtworkLoader.swift` | `Data`/`URL` → `CGImage` |
 | `WallpaperGenerator.swift` | 四算法 Core Image 管线（**仅依赖 CGImage/CoreGraphics/CoreImage**） |

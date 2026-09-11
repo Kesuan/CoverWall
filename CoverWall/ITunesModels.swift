@@ -26,11 +26,16 @@ struct ITunesResult: Decodable, Hashable, Identifiable, Sendable {
         trackName == nil && collectionName != nil
     }
 
-    /// Replace the 100×100 thumbnail URL with a high-res size.
+    /// Replace the 100×100 thumbnail URL with a requested pixel size.
     /// The CDN caps at the original artwork resolution and will not upscale.
-    func highResArtworkURL(size: Int = 3000) -> URL? {
+    func artworkURL(size: Int) -> URL? {
         let replaced = artworkUrl100
             .replacingOccurrences(of: "100x100bb", with: "\(size)x\(size)bb")
         return URL(string: replaced)
+    }
+
+    /// Wallpaper-grade source artwork.
+    func highResArtworkURL(size: Int = 3000) -> URL? {
+        artworkURL(size: size)
     }
 }

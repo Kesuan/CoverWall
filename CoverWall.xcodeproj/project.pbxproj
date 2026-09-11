@@ -21,6 +21,7 @@
 		A18DFA21E98CA8657150F989 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 806AB05F9F37B03BF0E0050F /* Models.swift */; };
 		C8B41D351F6CC99A87C30CFA /* PhotoExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3430D160013D9A420C2DAD9 /* PhotoExportService.swift */; };
 		C9D445C3DB2590A0C1E8A97B /* ArtworkLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B79CAA5C7E2CC4C31EF1F88 /* ArtworkLoader.swift */; };
+		E1009671366DC22AD9D1713D /* ITunesChartsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B4C0957E32712113D8276FD /* ITunesChartsService.swift */; };
 		EF4BBB8405E0EA34AB31DF04 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = FAD41627193B6402412FF6FA /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
@@ -35,6 +36,7 @@
 		38664CEFB2DF2A5C01116927 /* FullscreenPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullscreenPreview.swift; sourceTree = "<group>"; };
 		3A2254A22445169C07041DE3 /* CoverWall.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = CoverWall.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3B79CAA5C7E2CC4C31EF1F88 /* ArtworkLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtworkLoader.swift; sourceTree = "<group>"; };
+		4B4C0957E32712113D8276FD /* ITunesChartsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ITunesChartsService.swift; sourceTree = "<group>"; };
 		4FA7B24B975286C11CEEBB01 /* ITunesModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ITunesModels.swift; sourceTree = "<group>"; };
 		5102194C62F1758FE8C9921D /* CoverWallApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverWallApp.swift; sourceTree = "<group>"; };
 		806AB05F9F37B03BF0E0050F /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -83,6 +85,7 @@
 				5102194C62F1758FE8C9921D /* CoverWallApp.swift */,
 				38664CEFB2DF2A5C01116927 /* FullscreenPreview.swift */,
 				8566EF2FF16BB837D109506D /* Info.plist */,
+				4B4C0957E32712113D8276FD /* ITunesChartsService.swift */,
 				4FA7B24B975286C11CEEBB01 /* ITunesModels.swift */,
 				2432ECD5164042F9F7E2E600 /* ITunesSearchService.swift */,
 				806AB05F9F37B03BF0E0050F /* Models.swift */,
@@ -196,6 +199,7 @@
 				005400CCF499E8CC387AB2A7 /* ContentView.swift in Sources */,
 				284FFF68DF32D36E84A364D0 /* CoverWallApp.swift in Sources */,
 				21C2CC1DA20A558A9948692A /* FullscreenPreview.swift in Sources */,
+				E1009671366DC22AD9D1713D /* ITunesChartsService.swift in Sources */,
 				35FED67B07337DF7C9353F1A /* ITunesModels.swift in Sources */,
 				0A0B08A010C8B73120D39DCC /* ITunesSearchService.swift in Sources */,
 				A18DFA21E98CA8657150F989 /* Models.swift in Sources */,
