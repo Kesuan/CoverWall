@@ -44,7 +44,8 @@
 "loading_generate" = "Generating four wallpapers…";
 "artwork_source_label" = "source artwork";
 "preview_action" = "Preview";
-"exit_preview_action" = "Tap to exit preview";
+"toggle_chrome_action" = "Tap to show or hide controls";
+"close_action" = "Close";
 
 /* Export */
 "save_photos" = "Save to Photos";

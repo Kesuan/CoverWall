@@ -61,8 +61,8 @@ xcodebuild -project CoverWall.xcodeproj -scheme CoverWall \
 | 文件 | 职责 |
 |------|------|
 | `CoverWallApp.swift` | `@main` 入口；macOS 默认窗口尺寸 |
-| `ContentView.swift` | 根导航：macOS `NavigationSplitView` / iOS `NavigationStack` |
-| `SearchViewModel.swift` | 搜索词、结果列表、搜索状态 |
+| `ContentView.swift` | 根导航：macOS `NavigationSplitView` / iOS `NavigationStack`；系统 `.searchable` 集成（macOS sidebar 顶部 / iOS 导航栏抽屉） |
+| `SearchViewModel.swift` | 搜索词防抖实时搜索（350ms，清空即回发现页）、代次计数丢弃过期响应、结果与发现页状态 |
 | `ITunesModels.swift` | 搜索结果模型 |
 | `ITunesSearchService.swift` | 专辑+歌曲并行搜索、封面下载 |
 | `ITunesChartsService.swift` | 官方 RSS 榜单 + 随机流派混池（发现页封面墙） |
@@ -71,6 +71,7 @@ xcodebuild -project CoverWall.xcodeproj -scheme CoverWall \
 | `WallpaperGenerator.swift` | 四算法 Core Image 管线（**仅依赖 CGImage/CoreGraphics/CoreImage**） |
 | `Models.swift` | `DeviceProfile` / `WallpaperAlgorithm` / `WallpaperResult` |
 | `StudioDetail.swift` | 设备切换 + 四方案对比网格 |
+| `CardInteractions.swift` | 共享交互原语：按压缩放按钮样式、封面淡入加载图、骨架扫光占位、卡片描边 |
 | `FullscreenPreview.swift` | 全屏预览与导出 |
 | `PhotoExportService.swift` | JPEG 编码、`PHPhotoLibrary` 写入、macOS `NSSavePanel` |
 | `PlatformImage.swift` | `CGImage` → UIKit/AppKit 的唯一桥接点 |

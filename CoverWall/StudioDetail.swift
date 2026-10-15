@@ -36,47 +36,94 @@ struct StudioDetail: View {
     }
 
     private var studioBody: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                header
-                devicePicker
-                if studio.isDownloading {
-                    loadingBlock(titleKey: "loading_artwork")
-                } else if studio.isGenerating {
-                    loadingBlock(titleKey: "loading_generate")
-                } else if let error = studio.errorMessage {
-                    Label(error, systemImage: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.red)
-                        .font(.subheadline)
-                } else if !studio.results.isEmpty {
-                    resultsGrid
-                }
+        ZStack(alignment: .top) {
+            ambientHeader
 
-                if let exportMessage = studio.exportMessage {
-                    Label(exportMessage, systemImage: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                        .font(.subheadline)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    header
+                    devicePicker
+                    if studio.isDownloading {
+                        loadingBlock(titleKey: "loading_artwork")
+                    } else if studio.isGenerating {
+                        loadingBlock(titleKey: "loading_generate")
+                    } else if let error = studio.errorMessage {
+                        Label(error, systemImage: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.red)
+                            .font(.subheadline)
+                    } else if !studio.results.isEmpty {
+                        resultsGrid
+                    }
+
+                    if let exportMessage = studio.exportMessage {
+                        Label(exportMessage, systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                            .font(.subheadline)
+                    }
                 }
+                .padding(24)
             }
-            .padding(24)
+            #if os(macOS)
+            .frame(minWidth: 640, minHeight: 560)
+            #endif
         }
-        #if os(macOS)
-        .frame(minWidth: 640, minHeight: 560)
-        #endif
+    }
+
+    /// Apple Music album-page ambience: the artwork, heavily blurred and scaled up,
+    /// bleeding from the top edge and dissolving into the window background.
+    /// The mask both fades the image to transparent and clips the scaleEffect
+    /// overflow, so the ambience ends seamlessly on any background.
+    private var ambientHeader: some View {
+        Group {
+            if let selection {
+                Color.clear
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 300)
+                    .overlay {
+                        AsyncImage(
+                            url: selection.artworkURL(size: 600),
+                            transaction: Transaction(animation: .easeIn(duration: 0.35))
+                        ) { phase in
+                            if let image = phase.image {
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .transition(.opacity)
+                            }
+                        }
+                    }
+                    .clipped()
+                    .blur(radius: 60)
+                    .scaleEffect(1.2) // pushes the blurred feathered edges past the mask's bounds
+                    .saturation(1.25)
+                    .opacity(0.55)
+                    .mask {
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: .black, location: 0),
+                                .init(color: .black, location: 0.4),
+                                .init(color: .clear, location: 1)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    }
+                    .allowsHitTesting(false)
+                    #if os(iOS)
+                    .ignoresSafeArea(edges: .top)
+                    #endif
+            }
+        }
     }
 
     private var header: some View {
         HStack(alignment: .top, spacing: 16) {
             if let selection {
-                AsyncImage(url: selection.artworkURL(size: 300)) { phase in
-                    if let image = phase.image {
-                        image.resizable().scaledToFill()
-                    } else {
-                        RoundedRectangle(cornerRadius: 12).fill(.quaternary)
-                    }
-                }
-                .frame(width: 84, height: 84)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                ArtworkImage(url: selection.artworkURL(size: 300))
+                    .frame(width: 84, height: 84)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .cardHairline(cornerRadius: 14)
+                    .shadow(color: .black.opacity(0.18), radius: 10, y: 5)
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(selection.title)
@@ -136,8 +183,14 @@ struct StudioDetail: View {
 
     private var devicePicker: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("target_device")
-                .font(.headline)
+            Label {
+                Text("target_device")
+            } icon: {
+                Image(systemName: studio.selectedDevice.symbolName)
+                    .foregroundStyle(.secondary)
+            }
+            .font(.headline)
+            .contentTransition(.symbolEffect(.replace))
             Picker("target_device", selection: $studio.selectedDevice) {
                 ForEach(DeviceProfile.allCases) { device in
                     Text("\(device.localizedTitle) · \(device.subtitle)")
@@ -149,24 +202,38 @@ struct StudioDetail: View {
         }
     }
 
+    private var gridColumns: [GridItem] {
+        [GridItem(.adaptive(minimum: 200, maximum: 340), spacing: 16)]
+    }
+
+    private var deviceAspect: CGFloat {
+        let size = studio.selectedDevice.outputSize
+        guard size.height > 0 else { return 1 }
+        return size.width / size.height
+    }
+
     private func loadingBlock(titleKey: LocalizedStringKey) -> some View {
-        VStack(spacing: 12) {
-            ProgressView()
-                .controlSize(.large)
-            Text(titleKey)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+        VStack(spacing: 18) {
+            LazyVGrid(columns: gridColumns, spacing: 16) {
+                ForEach(0..<4, id: \.self) { _ in
+                    SkeletonCard(aspect: deviceAspect)
+                }
+            }
+
+            HStack(spacing: 8) {
+                ProgressView()
+                    .controlSize(.small)
+                Text(titleKey)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
         }
-        .frame(maxWidth: .infinity, minHeight: 280)
     }
 
     private var resultsGrid: some View {
-        LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 200, maximum: 340), spacing: 16)],
-            spacing: 16
-        ) {
-            ForEach(studio.results) { result in
-                ResultCard(result: result) {
+        LazyVGrid(columns: gridColumns, spacing: 16) {
+            ForEach(Array(studio.results.enumerated()), id: \.element.id) { index, result in
+                ResultCard(result: result, entranceIndex: index) {
                     fullScreenResult = result
                 }
             }
@@ -174,9 +241,34 @@ struct StudioDetail: View {
     }
 }
 
+private struct SkeletonCard: View {
+    var aspect: CGFloat
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ShimmerBox(cornerRadius: 14)
+                .aspectRatio(aspect, contentMode: .fit)
+                .frame(maxWidth: .infinity)
+
+            ShimmerBox(cornerRadius: 5)
+                .frame(width: 110, height: 14)
+
+            ShimmerBox(cornerRadius: 5)
+                .frame(height: 10)
+                .padding(.trailing, 40)
+        }
+        .padding(12)
+        .background(.quaternary.opacity(0.28), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+    }
+}
+
 struct ResultCard: View {
     let result: WallpaperResult
+    var entranceIndex: Int = 0
     let onPreview: () -> Void
+
+    @State private var isHovered = false
+    @State private var appeared = false
 
     private var previewAspectFit: CGFloat {
         let width = CGFloat(result.image.width)
@@ -185,12 +277,22 @@ struct ResultCard: View {
         return width / height
     }
 
+    /// iPhone has no pointer, so keep the badge always visible there.
+    private var badgeVisible: Bool {
+        #if os(iOS)
+        return true
+        #else
+        return isHovered
+        #endif
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Button(action: onPreview) {
                 PlatformImage(cgImage: result.image)
                     .aspectRatio(previewAspectFit, contentMode: .fit)
                     .frame(maxWidth: .infinity)
+                    .scaleEffect(isHovered ? 1.03 : 1)
                     .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                     .overlay(alignment: .bottomTrailing) {
                         Label(String(localized: "preview_action"), systemImage: "eye")
@@ -200,13 +302,25 @@ struct ResultCard: View {
                             .background(.black.opacity(0.55), in: Capsule())
                             .foregroundStyle(.white)
                             .padding(10)
+                            .opacity(badgeVisible ? 1 : 0)
                     }
+                    .cardHairline(cornerRadius: 14)
+                    .shadow(
+                        color: .black.opacity(isHovered ? 0.24 : 0.10),
+                        radius: isHovered ? 14 : 6,
+                        y: isHovered ? 7 : 3
+                    )
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.pressFeedback)
+            .onHover { hovering in
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isHovered = hovering
+                }
+            }
 
             HStack(spacing: 8) {
                 Circle()
-                    .fill(result.algorithm.accentColor)
+                    .fill(result.algorithm.accentColor.gradient)
                     .frame(width: 9, height: 9)
                 Text(result.algorithm.title)
                     .font(.headline)
@@ -220,5 +334,12 @@ struct ResultCard: View {
         }
         .padding(12)
         .background(.quaternary.opacity(0.28), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .opacity(appeared ? 1 : 0)
+        .offset(y: appeared ? 0 : 14)
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.35).delay(Double(entranceIndex) * 0.06)) {
+                appeared = true
+            }
+        }
     }
 }

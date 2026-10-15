@@ -44,7 +44,8 @@
 "loading_generate" = "正在生成四种壁纸…";
 "artwork_source_label" = "源封面";
 "preview_action" = "预览";
-"exit_preview_action" = "轻点退出预览";
+"toggle_chrome_action" = "轻点显示或隐藏控件";
+"close_action" = "关闭";
 
 /* Export */
 "save_photos" = "保存到相册";

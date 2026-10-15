@@ -4,7 +4,13 @@ import SwiftUI
 @MainActor
 @Observable
 final class SearchViewModel {
-    var searchTerm = ""
+    /// Any edit schedules a debounced live search, Apple-Music style:
+    /// typing pauses briefly before querying; clearing the term restores discovery.
+    var searchTerm = "" {
+        didSet {
+            if searchTerm != oldValue { scheduleSearch() }
+        }
+    }
     var albums: [ITunesResult] = []
     var songs: [ITunesResult] = []
     var isSearching = false
@@ -17,23 +23,50 @@ final class SearchViewModel {
     private let service = ITunesSearchService()
     private let chartsService = ITunesChartsService()
     private var lastFeaturedGenreId: Int?
+    private var searchTask: Task<Void, Never>?
+    private var searchGeneration = 0
 
     var hasResults: Bool {
         !albums.isEmpty || !songs.isEmpty
     }
 
+    private func scheduleSearch() {
+        searchTask?.cancel()
+        let term = searchTerm.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !term.isEmpty else {
+            searchGeneration += 1
+            albums = []
+            songs = []
+            errorMessage = nil
+            isSearching = false
+            return
+        }
+        searchTask = Task {
+            try? await Task.sleep(for: .milliseconds(350))
+            guard !Task.isCancelled else { return }
+            await runSearch()
+        }
+    }
+
+    /// Immediate search (keyboard submit). Cancels any pending debounced search.
+    /// Stale responses from superseded queries are dropped via the generation counter.
     func runSearch() async {
+        searchTask?.cancel()
         let term = searchTerm.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !term.isEmpty else { return }
 
+        searchGeneration += 1
+        let generation = searchGeneration
         isSearching = true
         errorMessage = nil
 
         do {
             let outcome = try await service.search(term: term)
+            guard generation == searchGeneration, !Task.isCancelled else { return }
             albums = outcome.albums
             songs = outcome.songs
         } catch {
+            guard generation == searchGeneration, !Task.isCancelled else { return }
             albums = []
             songs = []
             errorMessage = error.localizedDescription

@@ -14,32 +14,48 @@ struct FullscreenPreview: View {
     @State private var isSaving = false
     @State private var statusMessage: LocalizedStringKey?
     @State private var errorMessage: String?
+    @State private var chromeVisible = true
 
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
 
+            PreviewZoomableImage(cgImage: result.image) {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    chromeVisible.toggle()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
             VStack(spacing: 0) {
                 header
                     .padding(.horizontal, 20)
                     .padding(.top, 14)
+                    .padding(.bottom, 28)
+                    .background(
+                        LinearGradient(
+                            colors: [.black.opacity(0.55), .clear],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
 
-                PreviewZoomableImage(cgImage: result.image, onClose: onClose)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                Spacer(minLength: 0)
 
                 actionBar
                     .padding(.bottom, 16)
             }
+            .opacity(chromeVisible ? 1 : 0)
+            .allowsHitTesting(chromeVisible)
         }
+        .previewStatusBarHidden(!chromeVisible)
     }
 
     private var header: some View {
         HStack(alignment: .center, spacing: 12) {
             HStack(spacing: 8) {
                 Circle()
-                    .fill(result.algorithm.accentColor)
+                    .fill(result.algorithm.accentColor.gradient)
                     .frame(width: 10, height: 10)
                 Text(result.algorithm.title)
                     .font(.title3.bold())
@@ -65,6 +81,16 @@ struct FullscreenPreview: View {
                     .multilineTextAlignment(.trailing)
                     .lineLimit(2)
             }
+
+            Button(action: onClose) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(8)
+                    .background(.white.opacity(0.16), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(String(localized: "close_action"))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -146,10 +172,10 @@ struct FullscreenPreview: View {
 // MARK: - Zoomable fit image
 
 /// Always aspect-fits the full image in the available space (no scrolling).
-/// Pinch / trackpad / scroll-wheel zooms; pan while zoomed; click returns when at fit scale.
+/// Pinch / trackpad / scroll-wheel zooms; pan while zoomed; tap toggles the chrome when at fit scale.
 private struct PreviewZoomableImage: View {
     let cgImage: CGImage
-    let onClose: () -> Void
+    let onTap: () -> Void
 
     @State private var scale: CGFloat = 1
     @State private var lastScale: CGFloat = 1
@@ -208,11 +234,11 @@ private struct PreviewZoomableImage: View {
                     if isZoomed {
                         resetZoom()
                     } else {
-                        onClose()
+                        onTap()
                     }
                 }
                 .accessibilityAddTraits(.isButton)
-                .accessibilityLabel(String(localized: "exit_preview_action"))
+                .accessibilityLabel(String(localized: "toggle_chrome_action"))
                 .onAppear {
                     container = proxy.size
                 }
@@ -314,6 +340,19 @@ private final class ScrollWheelNSView: NSView {
 }
 #endif
 
+// MARK: - Platform helpers
+
+private extension View {
+    /// Hides the status bar in immersive preview mode (iOS only).
+    func previewStatusBarHidden(_ hidden: Bool) -> some View {
+        #if os(iOS)
+        self.statusBarHidden(hidden)
+        #else
+        self
+        #endif
+    }
+}
+
 // MARK: - Share payload
 
 struct PlatformShareImage: Transferable {
@@ -331,7 +370,7 @@ struct PlatformShareImage: Transferable {
     }
 }
 
-private extension Image {
+extension Image {
     init(platformImage: PlatformShareImage) {
         #if canImport(UIKit)
         self.init(uiImage: UIImage(cgImage: platformImage.cgImage))

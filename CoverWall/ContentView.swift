@@ -27,10 +27,10 @@ struct ContentView: View {
                     onClose: { self.fullScreenResult = nil },
                     suggestedFileName: studioModel.suggestedFileName
                 )
-                .transition(.opacity)
+                .transition(.opacity.combined(with: .scale(scale: 0.96)))
             }
         }
-        .animation(.easeInOut(duration: 0.2), value: fullScreenResult?.id)
+        .animation(.spring(response: 0.34, dampingFraction: 0.9), value: fullScreenResult?.id)
         .onExitCommand {
             fullScreenResult = nil
         }
@@ -66,83 +66,36 @@ private struct SearchSidebar: View {
     @Binding var selection: ITunesResult?
 
     var body: some View {
-        VStack(spacing: 0) {
-            SearchHeader(model: model)
-            Divider()
-            SearchResultsList(model: model, selection: $selection)
-        }
-        .background(.regularMaterial)
-        .task { await model.loadFeaturedAlbums() }
-    }
-}
-#endif
-
-// MARK: - Shared search chrome
-
-private struct SearchHeader: View {
-    @Bindable var model: SearchViewModel
-    @FocusState private var searchFocused: Bool
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("app_title")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                Text("app_tagline")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+        SearchSidebarBody(model: model, selection: $selection)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(.regularMaterial)
+            .searchable(
+                text: $model.searchTerm,
+                placement: .sidebar,
+                prompt: Text("search_placeholder")
+            )
+            .autocorrectionDisabled()
+            .onSubmit(of: .search) {
+                Task { await model.runSearch() }
             }
-
-            HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                TextField("search_placeholder", text: $model.searchTerm)
-                    .textFieldStyle(.plain)
-                    .focused($searchFocused)
-                    .onSubmit {
-                        Task { await model.runSearch() }
-                    }
-            }
-            .padding(10)
-            .background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 10))
-
-            HStack(spacing: 8) {
-                Button {
-                    Task { await model.runSearch() }
-                } label: {
-                    if model.isSearching {
-                        ProgressView()
-                            .controlSize(.small)
-                    } else {
-                        Label("search_action", systemImage: "magnifyingglass")
-                    }
-                }
-                .disabled(
-                    model.searchTerm.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                        || model.isSearching
-                )
-                .keyboardShortcut(.defaultAction)
-            }
-
-            if let error = model.errorMessage {
-                Label(error, systemImage: "exclamationmark.triangle.fill")
-                    .font(.caption)
-                    .foregroundStyle(.red)
-            }
-        }
-        .padding(16)
+            .task { await model.loadFeaturedAlbums() }
     }
 }
 
-private struct SearchResultsList: View {
+/// Keeps previous results on screen while a live search is in flight
+/// (Apple Music behavior — no full-screen spinner flicker on every keystroke).
+private struct SearchSidebarBody: View {
     let model: SearchViewModel
     @Binding var selection: ITunesResult?
 
     var body: some View {
         Group {
-            if !model.hasResults && !model.isSearching {
-                FeaturedSidebarContent(model: model, selection: $selection)
-            } else {
+            if model.isSearching && !model.hasResults {
+                ProgressView(String(localized: "search_in_progress"))
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let error = model.errorMessage, !model.hasResults {
+                SearchFailedView(message: error)
+            } else if model.hasResults {
                 List(selection: $selection) {
                     if !model.albums.isEmpty {
                         Section(String(localized: "section_albums")) {
@@ -162,8 +115,26 @@ private struct SearchResultsList: View {
                     }
                 }
                 .listStyle(.sidebar)
+            } else {
+                FeaturedSidebarContent(model: model, selection: $selection)
             }
         }
+    }
+}
+#endif
+
+// MARK: - Shared search chrome
+
+private struct SearchFailedView: View {
+    let message: String
+
+    var body: some View {
+        ContentUnavailableView {
+            Label(String(localized: "search_failed"), systemImage: "exclamationmark.triangle")
+        } description: {
+            Text(message)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -176,7 +147,7 @@ private struct FeaturedSidebarContent: View {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 8) {
                     Text("featured_title")
-                        .font(.headline)
+                        .font(.title3.weight(.bold))
                     Spacer()
                     Button {
                         Task { await model.refreshFeaturedAlbums() }
@@ -229,95 +200,41 @@ private struct FeaturedSidebarContent: View {
 private struct SearchList: View {
     @Bindable var model: SearchViewModel
     @Binding var selection: ITunesResult?
-    @FocusState private var searchFocused: Bool
 
     var body: some View {
-        VStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("app_tagline")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-
-                HStack(spacing: 8) {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundStyle(.secondary)
-                    TextField("search_placeholder", text: $model.searchTerm)
-                        .focused($searchFocused)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .onSubmit {
-                            Task { await model.runSearch() }
-                        }
-                }
-                .padding(10)
-                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 10))
-
-                HStack {
-                    Spacer()
-
-                    Button {
-                        searchFocused = false
-                        Task { await model.runSearch() }
-                    } label: {
-                        if model.isSearching {
-                            ProgressView()
-                        } else {
-                            Text("search_action")
-                                .fontWeight(.semibold)
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(
-                        model.searchTerm.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                            || model.isSearching
-                    )
-                }
-
-                if let error = model.errorMessage {
-                    Label(error, systemImage: "exclamationmark.triangle.fill")
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 12)
-
-            if model.isSearching {
+        Group {
+            if model.isSearching && !model.hasResults {
                 VStack {
                     Spacer()
                     ProgressView(String(localized: "search_in_progress"))
                     Spacer()
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if let error = model.errorMessage, !model.hasResults {
+                SearchFailedView(message: error)
             } else if model.hasResults {
                 List {
                     if !model.albums.isEmpty {
                         Section(String(localized: "section_albums")) {
                             ForEach(model.albums) { album in
-                                Button {
+                                SearchResultButton(result: album) {
                                     selection = album
-                                } label: {
-                                    ResultRow(result: album)
                                 }
-                                .buttonStyle(.plain)
                             }
                         }
                     }
                     if !model.songs.isEmpty {
                         Section(String(localized: "section_songs")) {
                             ForEach(model.songs) { song in
-                                Button {
+                                SearchResultButton(result: song) {
                                     selection = song
-                                } label: {
-                                    ResultRow(result: song)
                                 }
-                                .buttonStyle(.plain)
                             }
                         }
                     }
                 }
                 .listStyle(.insetGrouped)
+                .scrollDismissesKeyboard(.immediately)
             } else if !model.searchTerm.isEmpty {
                 ContentUnavailableView(
                     String(localized: "search_empty"),
@@ -330,6 +247,16 @@ private struct SearchList: View {
             }
         }
         .navigationTitle("app_title")
+        .searchable(
+            text: $model.searchTerm,
+            placement: .navigationBarDrawer(displayMode: .always),
+            prompt: Text("search_placeholder")
+        )
+        .textInputAutocapitalization(.never)
+        .autocorrectionDisabled()
+        .onSubmit(of: .search) {
+            Task { await model.runSearch() }
+        }
         .task { await model.loadFeaturedAlbums() }
     }
 
@@ -339,7 +266,7 @@ private struct SearchList: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("featured_title")
-                        .font(.headline)
+                        .font(.title3.weight(.bold))
                     FeaturedAlbumsGrid(albums: model.featuredAlbums) { album in
                         selection = album
                     }
@@ -375,6 +302,36 @@ private struct SearchList: View {
         }
     }
 }
+
+/// Full-width tappable row with a Music-style pressed highlight.
+private struct SearchResultButton: View {
+    let result: ITunesResult
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            ResultRow(result: result)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        }
+        .buttonStyle(SearchRowButtonStyle())
+        .listRowInsets(EdgeInsets(top: 3, leading: 12, bottom: 3, trailing: 12))
+        .listRowSeparator(.hidden)
+    }
+}
+
+private struct SearchRowButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(
+                configuration.isPressed ? Color.primary.opacity(0.09) : Color.clear,
+                in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+            )
+            .animation(.easeOut(duration: 0.15), value: configuration.isPressed)
+    }
+}
 #endif
 
 // MARK: - Featured albums
@@ -402,7 +359,7 @@ private struct FeaturedAlbumsGrid: View {
                 } label: {
                     FeaturedAlbumCell(album: album)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.pressFeedback)
             }
         }
     }
@@ -412,6 +369,7 @@ private struct FeaturedAlbumCell: View {
     let album: ITunesResult
 
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var isHovered = false
 
     private var usesLargeLayout: Bool {
         #if os(iOS)
@@ -426,16 +384,21 @@ private struct FeaturedAlbumCell: View {
             Color.clear
                 .aspectRatio(1, contentMode: .fit)
                 .overlay {
-                    AsyncImage(url: album.artworkURL(size: 600)) { image in
-                        image
-                            .resizable()
-                            .scaledToFill()
-                    } placeholder: {
-                        Rectangle()
-                            .fill(.quaternary)
+                    ArtworkImage(url: album.artworkURL(size: 600))
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .cardHairline(cornerRadius: 12)
+                .shadow(
+                    color: .black.opacity(isHovered ? 0.28 : 0.14),
+                    radius: isHovered ? 14 : 7,
+                    y: isHovered ? 7 : 3
+                )
+                .scaleEffect(isHovered ? 1.04 : 1)
+                .onHover { hovering in
+                    withAnimation(.spring(response: 0.28, dampingFraction: 0.7)) {
+                        isHovered = hovering
                     }
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
 
             Text(album.title)
                 .font(usesLargeLayout ? .subheadline.weight(.semibold) : .caption.weight(.semibold))
@@ -455,18 +418,11 @@ struct ResultRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            AsyncImage(url: result.artworkURL(size: 200)) { phase in
-                if let image = phase.image {
-                    image
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(.quaternary)
-                }
-            }
-            .frame(width: 56, height: 56)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            ArtworkImage(url: result.artworkURL(size: 200))
+                .frame(width: 56, height: 56)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .cardHairline(cornerRadius: 10)
+                .shadow(color: .black.opacity(0.12), radius: 4, y: 2)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(result.title)
