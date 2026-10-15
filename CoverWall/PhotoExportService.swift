@@ -51,7 +51,10 @@ enum PhotoExportService {
     }
 
     static func saveToPhotoLibrary(_ image: CGImage) async throws {
-        let data = try jpegData(from: image)
+        try await saveToPhotoLibrary(try jpegData(from: image))
+    }
+
+    static func saveToPhotoLibrary(_ data: Data) async throws {
         try await requestAddOnlyPermission()
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             PHPhotoLibrary.shared().performChanges({
@@ -91,7 +94,10 @@ enum PhotoExportService {
 #if os(macOS)
 extension PhotoExportService {
     static func savePanelWrite(_ image: CGImage, suggestedName: String) throws {
-        let data = try jpegData(from: image)
+        try savePanelWrite(try jpegData(from: image), suggestedName: suggestedName)
+    }
+
+    static func savePanelWrite(_ data: Data, suggestedName: String) throws {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.jpeg]
         panel.canCreateDirectories = true

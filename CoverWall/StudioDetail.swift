@@ -93,6 +93,44 @@ struct StudioDetail: View {
                 }
             }
             Spacer()
+            artworkExportActions
+        }
+    }
+
+    @ViewBuilder
+    private var artworkExportActions: some View {
+        if studio.sourceArtwork != nil || studio.isDownloading {
+            HStack(spacing: 10) {
+                Button {
+                    #if os(macOS)
+                    studio.saveArtworkViaPanel()
+                    #else
+                    Task { await studio.saveArtwork() }
+                    #endif
+                } label: {
+                    Label(
+                        String(localized: "save_artwork"),
+                        systemImage: "square.and.arrow.down"
+                    )
+                }
+                .buttonStyle(.bordered)
+                .disabled(!studio.isArtworkExportReady)
+
+                if let payload = studio.artworkSharePayload() {
+                    ShareLink(
+                        item: payload,
+                        preview: SharePreview(
+                            studio.suggestedArtworkFileName,
+                            image: Image(platformImage: payload)
+                        )
+                    ) {
+                        Label(String(localized: "share_action"), systemImage: "square.and.arrow.up")
+                    }
+                    .buttonStyle(.borderless)
+                    .disabled(!studio.isArtworkExportReady)
+                }
+            }
+            .font(.subheadline)
         }
     }
 

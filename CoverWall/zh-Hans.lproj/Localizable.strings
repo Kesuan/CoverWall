@@ -52,6 +52,9 @@
 "share_action" = "分享";
 "export_saved_photos" = "已保存到相册";
 "export_saved_file" = "文件已保存";
+"save_artwork" = "保存封面原图";
+"export_saved_artwork_photos" = "封面已保存到相册";
+"export_saved_artwork_file" = "封面文件已保存";
 
 /* Errors */
 "error_invalid_image" = "无法解码封面图片。";
@@ -59,3 +62,4 @@
 "error_encode_failed" = "无法将壁纸编码为 JPEG。";
 "error_photo_permission" = "相册权限被拒绝。";
 "error_save_failed" = "无法保存壁纸。";
+"error_artwork_unavailable" = "封面原图尚未就绪。";

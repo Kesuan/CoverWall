@@ -52,6 +52,9 @@
 "share_action" = "Share";
 "export_saved_photos" = "Saved to Photos";
 "export_saved_file" = "File saved";
+"save_artwork" = "Save Original Artwork";
+"export_saved_artwork_photos" = "Artwork saved to Photos";
+"export_saved_artwork_file" = "Artwork file saved";
 
 /* Errors */
 "error_invalid_image" = "Could not decode the artwork image.";
@@ -59,3 +62,4 @@
 "error_encode_failed" = "Could not encode the wallpaper as JPEG.";
 "error_photo_permission" = "Photo library permission was denied.";
 "error_save_failed" = "Could not save the wallpaper.";
+"error_artwork_unavailable" = "Original artwork is not ready yet.";
